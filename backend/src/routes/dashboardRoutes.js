@@ -1,23 +1,44 @@
-const express = require('express');
-const router = express.Router();
+const express =
+    require("express");
 
-const authMiddleware = require('../middleware/authMiddleware');
+const router =
+    express.Router();
+
+const authMiddleware =
+    require("../middleware/authMiddleware");
+
+const permission =
+    require("../middleware/permissionMiddleware");
+
+const PERMISSIONS =
+    require("../constants/permissions");
 
 const {
     getStats,
     getDashboardActivity,
-} = require('../controllers/dashboardController');
+} = require(
+    "../controllers/dashboardController"
+);
 
 router.get(
-    '/stats',
+    "/stats",
     authMiddleware,
+    permission(
+        "dashboard",
+        PERMISSIONS.VIEW
+    ),
     getStats
 );
+
 router.get(
     "/activity",
     authMiddleware,
+    permission(
+        "dashboard",
+        PERMISSIONS.VIEW
+    ),
     getDashboardActivity
 );
 
-
-module.exports = router;
+module.exports =
+    router;

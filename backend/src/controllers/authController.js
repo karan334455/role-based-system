@@ -192,32 +192,12 @@ exports.register = async (req, res) => {
                 name: 'Owner',
                 isAdmin: true,
                 permissions: {
-                    dashboard: {
-                        view: true,
-                        create: true,
-                        update: true,
-                        delete: true,
-                    },
-                    users: {
-                        view: true,
-                        create: true,
-                        update: true,
-                        delete: true,
-                    },
-                    roles: {
-                        view: true,
-                        create: true,
-                        update: true,
-                        delete: true,
-                    },
-                    profile: {
-                        view: true,
-                        update: true,
-                    },
-                    settings: {
-                        view: true,
-                        update: true,
-                    },
+                    dashboard: 15,
+                    users: 15,
+                    roles: 15,
+                    profile: 15,
+                    settings: 15,
+                    activityLogs: 15,
                 },
             },
 
@@ -225,21 +205,12 @@ exports.register = async (req, res) => {
                 tenantId: tenant._id,
                 name: 'HR',
                 permissions: {
-                    dashboard: {
-                        view: true,
-                    },
-                    users: {
-                        view: true,
-                        create: true,
-                        update: true,
-                        delete: false,
-                    },
-                    roles: {
-                        view: true,
-                        create: false,
-                        update: false,
-                        delete: false,
-                    },
+                    dashboard: 1,
+                    users: 7,
+                    roles: 1,
+                    profile: 7,
+                    settings: 1,
+                    activityLogs: 1,
                 },
             },
 
@@ -247,21 +218,12 @@ exports.register = async (req, res) => {
                 tenantId: tenant._id,
                 name: 'Manager',
                 permissions: {
-                    dashboard: {
-                        view: true,
-                    },
-                    users: {
-                        view: true,
-                        create: true,
-                        update: true,
-                        delete: false,
-                    },
-                    roles: {
-                        view: false,
-                        create: false,
-                        update: false,
-                        delete: false,
-                    },
+                    dashboard: 1,
+                    users: 7,
+                    roles: 0,
+                    profile: 7,
+                    settings: 0,
+                    activityLogs: 1,
                 },
             },
 
@@ -269,21 +231,12 @@ exports.register = async (req, res) => {
                 tenantId: tenant._id,
                 name: 'Employee',
                 permissions: {
-                    dashboard: {
-                        view: true,
-                    },
-                    users: {
-                        view: false,
-                        create: false,
-                        update: false,
-                        delete: false,
-                    },
-                    roles: {
-                        view: false,
-                        create: false,
-                        update: false,
-                        delete: false,
-                    },
+                    dashboard: 1,
+                    users: 0,
+                    roles: 0,
+                    profile: 7,
+                    settings: 0,
+                    activityLogs: 0,
                 },
             },
         ]);

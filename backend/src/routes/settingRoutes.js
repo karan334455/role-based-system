@@ -7,6 +7,12 @@ const router =
 const authMiddleware =
     require("../middleware/authMiddleware");
 
+const permission =
+    require("../middleware/permissionMiddleware");
+
+const PERMISSIONS =
+    require("../constants/permissions");
+
 const {
     getSettings,
     updateSettings,
@@ -15,13 +21,22 @@ const {
 router.get(
     "/",
     authMiddleware,
+    permission(
+        "settings",
+        PERMISSIONS.VIEW
+    ),
     getSettings
 );
 
 router.put(
     "/",
     authMiddleware,
+    permission(
+        "settings",
+        PERMISSIONS.UPDATE
+    ),
     updateSettings
 );
 
-module.exports = router;
+module.exports =
+    router;

@@ -1,45 +1,83 @@
-const express = require('express');
-const router = express.Router();
+const express =
+    require("express");
 
-const authMiddleware = require('../middleware/authMiddleware');
-const permission = require('../middleware/permissionMiddleware');
+const router =
+    express.Router();
 
-const { createRole, getRoles, getRole, updateRole, deleteRole } = require('../controllers/roleController');
+const authMiddleware =
+    require(
+        "../middleware/authMiddleware"
+    );
+
+const permission =
+    require(
+        "../middleware/permissionMiddleware"
+    );
+
+const PERMISSIONS =
+    require(
+        "../constants/permissions"
+    );
+
+const {
+    createRole,
+    getRoles,
+    getRole,
+    updateRole,
+    deleteRole,
+} = require(
+    "../controllers/roleController"
+);
 
 router.post(
-    '/',
+    "/",
     authMiddleware,
-    permission('roles', 'create'),
+    permission(
+        "roles",
+        PERMISSIONS.CREATE
+    ),
     createRole
 );
 
 router.get(
-    '/',
+    "/",
     authMiddleware,
-    permission('roles', 'view'),
+    permission(
+        "roles",
+        PERMISSIONS.VIEW
+    ),
     getRoles
 );
 
 router.get(
-    '/:id',
+    "/:id",
     authMiddleware,
-    permission('roles', 'view'),
+    permission(
+        "roles",
+        PERMISSIONS.VIEW
+    ),
     getRole
 );
 
-
 router.put(
-    '/:id',
+    "/:id",
     authMiddleware,
-    permission('roles', 'update'),
+    permission(
+        "roles",
+        PERMISSIONS.UPDATE
+    ),
     updateRole
 );
 
 router.delete(
-    '/:id',
+    "/:id",
     authMiddleware,
-    permission('roles', 'delete'),
+    permission(
+        "roles",
+        PERMISSIONS.DELETE
+    ),
     deleteRole
 );
 
-module.exports = router;
+module.exports =
+    router;

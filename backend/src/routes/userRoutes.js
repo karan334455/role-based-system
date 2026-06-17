@@ -1,8 +1,23 @@
-const express = require('express');
-const router = express.Router();
+const express =
+    require("express");
 
-const authMiddleware = require('../middleware/authMiddleware');
-const permission = require('../middleware/permissionMiddleware');
+const router =
+    express.Router();
+
+const authMiddleware =
+    require(
+        "../middleware/authMiddleware"
+    );
+
+const permission =
+    require(
+        "../middleware/permissionMiddleware"
+    );
+
+const PERMISSIONS =
+    require(
+        "../constants/permissions"
+    );
 
 const {
     createUser,
@@ -12,51 +27,79 @@ const {
     deleteUser,
     getPendingUsers,
     resendInvite,
-} = require('../controllers/userController');
+} = require(
+    "../controllers/userController"
+);
 
 router.post(
-    '/',
+    "/",
     authMiddleware,
-    permission('users', 'create'),
+    permission(
+        "users",
+        PERMISSIONS.CREATE
+    ),
     createUser
 );
 
 router.get(
-    '/',
+    "/",
     authMiddleware,
-    permission('users', 'view'),
+    permission(
+        "users",
+        PERMISSIONS.VIEW
+    ),
     getUsers
 );
 
 router.get(
     "/pending",
     authMiddleware,
+    permission(
+        "users",
+        PERMISSIONS.VIEW
+    ),
     getPendingUsers
 );
 
 router.put(
-    '/:id',
+    "/:id",
     authMiddleware,
-    permission('users', 'update'),
+    permission(
+        "users",
+        PERMISSIONS.UPDATE
+    ),
     updateUser
 );
 
 router.put(
-    '/:id/role',
+    "/:id/role",
     authMiddleware,
-    permission('users', 'update'),
+    permission(
+        "users",
+        PERMISSIONS.UPDATE
+    ),
     updateUserRole
 );
 
 router.delete(
-    '/:id',
+    "/:id",
     authMiddleware,
-    permission('users', 'delete'),
+    permission(
+        "users",
+        PERMISSIONS.DELETE
+    ),
     deleteUser
 );
+
 router.post(
     "/:id/resend-invite",
     authMiddleware,
+    permission(
+        "users",
+        PERMISSIONS.UPDATE
+    ),
     resendInvite
 );
-module.exports = router;
+
+module.exports =
+    router;

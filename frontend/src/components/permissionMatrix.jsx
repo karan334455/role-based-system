@@ -1,3 +1,10 @@
+const PERMISSIONS = {
+    VIEW: 1,
+    CREATE: 2,
+    UPDATE: 4,
+    DELETE: 8,
+};
+
 export default function PermissionMatrix({
     permissions,
     setPermissions,
@@ -7,69 +14,114 @@ export default function PermissionMatrix({
         "users",
         "roles",
         "profile",
-
+        "activityLogs",
     ];
 
     const actions = [
-        "view",
-        "create",
-        "update",
-        "delete",
+        {
+            key: "VIEW",
+            label: "View",
+            value: PERMISSIONS.VIEW,
+        },
+        {
+            key: "CREATE",
+            label: "Create",
+            value: PERMISSIONS.CREATE,
+        },
+        {
+            key: "UPDATE",
+            label: "Update",
+            value: PERMISSIONS.UPDATE,
+        },
+        {
+            key: "DELETE",
+            label: "Delete",
+            value: PERMISSIONS.DELETE,
+        },
     ];
 
     const handleToggle = (
         module,
-        action
+        permission
     ) => {
-        setPermissions((prev) => {
-            const current =
-                prev[module]?.[action];
+        let current =
+            permissions[module] || 0;
 
-            const updated = {
+        const has =
+            (current & permission) ===
+            permission;
+
+        if (!has) {
+            switch (permission) {
+                case PERMISSIONS.VIEW:
+                    current |=
+                        PERMISSIONS.VIEW;
+                    break;
+
+                case PERMISSIONS.CREATE:
+                    current |=
+                        PERMISSIONS.VIEW |
+                        PERMISSIONS.CREATE;
+                    break;
+
+                case PERMISSIONS.UPDATE:
+                    current |=
+                        PERMISSIONS.VIEW |
+                        PERMISSIONS.CREATE |
+                        PERMISSIONS.UPDATE;
+                    break;
+
+                case PERMISSIONS.DELETE:
+                    current |=
+                        PERMISSIONS.VIEW |
+                        PERMISSIONS.CREATE |
+                        PERMISSIONS.UPDATE |
+                        PERMISSIONS.DELETE;
+                    break;
+
+                default:
+                    break;
+            }
+        } else {
+            switch (permission) {
+                case PERMISSIONS.VIEW:
+                    current = 0;
+                    break;
+
+                case PERMISSIONS.CREATE:
+                    current &=
+                        ~(
+                            PERMISSIONS.CREATE |
+                            PERMISSIONS.UPDATE |
+                            PERMISSIONS.DELETE
+                        );
+                    break;
+
+                case PERMISSIONS.UPDATE:
+                    current &=
+                        ~(
+                            PERMISSIONS.UPDATE |
+                            PERMISSIONS.DELETE
+                        );
+                    break;
+
+                case PERMISSIONS.DELETE:
+                    current &=
+                        ~PERMISSIONS.DELETE;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        setPermissions(
+            (prev) => ({
                 ...prev,
-                [module]: {
-                    ...prev[module],
-                    [action]: !current,
-                },
-            };
-
-            // Delete => enable all permissions
-            if (
-                action === "delete" &&
-                !current
-            ) {
-                updated[module] = {
-                    view: true,
-                    create: true,
-                    update: true,
-                    delete: true,
-                };
-            }
-
-            // Create/Update require View
-            if (
-                (action === "create" ||
-                    action === "update") &&
-                !current
-            ) {
-                updated[module].view = true;
-            }
-
-            // View unchecked => remove all permissions
-            if (
-                action === "view" &&
-                current
-            ) {
-                updated[module] = {
-                    view: false,
-                    create: false,
-                    update: false,
-                    delete: false,
-                };
-            }
-
-            return updated;
-        });
+                [module]:
+                    current,
+            })
+        );
     };
 
     return (
@@ -78,52 +130,71 @@ export default function PermissionMatrix({
                 Permissions
             </h2>
 
-            {modules.map((module) => (
-                <div
-                    key={module}
-                    className="bg-gray-50 border rounded-xl p-5"
-                >
-                    <h3 className="font-semibold text-lg capitalize mb-4">
-                        {module}
-                    </h3>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {actions.map(
-                            (action) => (
-                                <label
-                                    key={action}
-                                    className="flex items-center gap-2 cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={
-                                            permissions?.[
-                                            module
-                                            ]?.[
-                                            action
-                                            ] ||
-                                            false
-                                        }
-                                        onChange={() =>
-                                            handleToggle(
-                                                module,
-                                                action
-                                            )
-                                        }
-                                        className="h-4 w-4"
-                                    />
-
-                                    <span className="capitalize">
-                                        {
-                                            action
-                                        }
-                                    </span>
-                                </label>
+            {modules.map(
+                (module) => {
+                    const moduleActions =
+                        module ===
+                            "activityLogs"
+                            ? actions.filter(
+                                (
+                                    a
+                                ) =>
+                                    a.key ===
+                                    "VIEW"
                             )
-                        )}
-                    </div>
-                </div>
-            ))}
+                            : actions;
+
+                    return (
+                        <div
+                            key={
+                                module
+                            }
+                            className="bg-gray-50 border rounded-xl p-5"
+                        >
+                            <h3 className="font-semibold text-lg capitalize mb-4">
+                                {module}
+                            </h3>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {moduleActions.map(
+                                    (
+                                        action
+                                    ) => (
+                                        <label
+                                            key={
+                                                action.key
+                                            }
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    (
+                                                        (permissions[module] || 0) &
+                                                        action.value
+                                                    ) === action.value
+                                                }
+                                                onChange={() =>
+                                                    handleToggle(
+                                                        module,
+                                                        action.value
+                                                    )
+                                                }
+                                            />
+
+                                            <span>
+                                                {
+                                                    action.label
+                                                }
+                                            </span>
+                                        </label>
+                                    )
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+            )}
         </div>
     );
 }

@@ -9,16 +9,20 @@ import {
 import { UserContext } from "../../../contexts/UserContext.jsx";
 import api from "@/app/axios";
 import toast from "react-hot-toast";
+import PERMISSIONS from "@/constants/permissions";
+import hasPermission from "@/utils/hasPermission";
 
 const can = (module, action) => {
     try {
         const user = JSON.parse(
             localStorage.getItem("user")
         );
+        if (!user) return false;
+        if (user?.roleId?.isAdmin === true) return true;
 
-        return !!user?.roleId?.permissions?.[
-            module
-        ]?.[action];
+        const value = user?.roleId?.permissions?.[module] || 0;
+        const required = PERMISSIONS[action.toUpperCase()];
+        return hasPermission(value, required);
     } catch {
         return false;
     }

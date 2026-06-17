@@ -9,40 +9,16 @@ export default function CreateRole() {
     const navigate = useNavigate();
 
     const [name, setName] = useState("");
-
     const [permissions, setPermissions] =
         useState({
-            dashboard: {
-                view: false,
-                create: false,
-                update: false,
-                delete: false,
-            },
-            users: {
-                view: false,
-                create: false,
-                update: false,
-                delete: false,
-            },
-            roles: {
-                view: false,
-                create: false,
-                update: false,
-                delete: false,
-            },
-            profile: {
-                view: false,
-                create: false,
-                update: false,
-                delete: false,
-            },
-            activityLogs: {
-                view: false,
-                create: false,
-                update: false,
-                delete: false,
-            },
+            dashboard: 0,
+            users: 0,
+            roles: 0,
+            profile: 0,
+            settings: 0,
+            activityLogs: 0,
         });
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();

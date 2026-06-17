@@ -7,6 +7,7 @@ import {
     resendInvite,
 } from "../../services/userService";
 import toast from "react-hot-toast";
+import PERMISSIONS from "@/constants/permissions";
 
 export default function UserList() {
     const navigate = useNavigate();
@@ -17,11 +18,17 @@ export default function UserList() {
     const currentUser = JSON.parse(
         localStorage.getItem("user")
     );
-
     useEffect(() => {
         fetchUsers();
     }, []);
 
+    const isCurrentUserAdmin = currentUser?.roleId?.isAdmin === true;
+    const canCreateUsers = isCurrentUserAdmin || !!((currentUser?.roleId?.permissions?.users || 0) & PERMISSIONS.CREATE);
+    const canUpdateUsers = isCurrentUserAdmin || !!((currentUser?.roleId?.permissions?.users || 0) & PERMISSIONS.UPDATE);
+    const canDeleteUsers = isCurrentUserAdmin || !!((currentUser?.roleId?.permissions?.users || 0) & PERMISSIONS.DELETE);
+    // console.log("canCreateUsers", canCreateUsers);
+    // console.log("canUpdateUsers", canUpdateUsers);
+    // console.log("canDeleteUsers", canDeleteUsers);
     const fetchUsers = async () => {
         try {
             const { data } = await getUsers();
@@ -122,16 +129,18 @@ export default function UserList() {
                     </p>
                 </div>
 
-                <button
-                    onClick={() =>
-                        navigate(
-                            "/users/create"
-                        )
-                    }
-                    className="bg-slate-900 text-white px-4 py-2 rounded-lg"
-                >
-                    Add User
-                </button>
+                {canCreateUsers && (
+                    <button
+                        onClick={() =>
+                            navigate(
+                                "/users/create"
+                            )
+                        }
+                        className="bg-slate-900 text-white px-4 py-2 rounded-lg"
+                    >
+                        Add User
+                    </button>
+                )}
             </div>
 
             <div className="flex gap-3 mb-5">
@@ -255,7 +264,7 @@ export default function UserList() {
                                         <td className="p-4">
                                             <div className="flex gap-2 flex-wrap">
 
-                                                {!isAdmin && (
+                                                {!isAdmin && canUpdateUsers && (
                                                     <Link
                                                         to={`/users/edit/${user._id}`}
                                                         className="px-3 py-1 bg-blue-500 text-white rounded"
@@ -279,6 +288,7 @@ export default function UserList() {
                                                     )}
 
                                                 {!isAdmin &&
+                                                    canDeleteUsers &&
                                                     user._id !==
                                                     currentUser?._id && (
                                                         <button
