@@ -1,5 +1,8 @@
 const Activity =
     require("../models/ActivitySchema");
+const { Parser } =
+    require("json2csv");
+
 
 exports.getActivities =
     async (req, res) => {
@@ -90,3 +93,41 @@ exports.getMyActivities =
             });
         }
     };
+
+
+
+exports.exportActivityCsv =
+    async (req, res) => {
+        const logs =
+            await ActivityLog.find()
+                .sort({
+                    createdAt: -1,
+                });
+
+
+        const fields = [
+            "action",
+            "description",
+            "createdAt",
+        ];
+
+        const parser =
+            new Parser({
+                fields,
+            });
+
+        const csv =
+            parser.parse(logs);
+
+        res.header(
+            "Content-Type",
+            "text/csv"
+        );
+
+        res.attachment(
+            "activity-logs.csv"
+        );
+
+        return res.send(csv);
+    };
+

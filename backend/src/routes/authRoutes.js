@@ -12,8 +12,16 @@ const {
     profile,
     updateProfile,
     changePassword,
-    acceptInvite
+    acceptInvite,
+    updateDocuments
 } = require('../controllers/authController');
+const upload =
+    require("../middleware/upload");
+const userDocumentUpload =
+    require(
+        "../middleware/userDocumentUpload"
+    );
+
 
 router.post('/register', register);
 
@@ -42,6 +50,9 @@ router.post(
 router.put(
     "/profile",
     authMiddleware,
+    upload.single(
+        "profileImage"
+    ),
     updateProfile
 );
 router.put(
@@ -49,4 +60,29 @@ router.put(
     authMiddleware,
     changePassword
 );
+router.put(
+    "/documents",
+    authMiddleware,
+    userDocumentUpload.fields([
+        {
+            name: "resume",
+            maxCount: 1,
+        },
+        {
+            name: "aadhaar",
+            maxCount: 1,
+        },
+        {
+            name: "panCard",
+            maxCount: 1,
+        },
+        {
+            name: "signature",
+            maxCount: 1,
+        },
+    ]),
+    updateDocuments
+);
+
+
 module.exports = router;

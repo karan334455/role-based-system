@@ -24,14 +24,22 @@ export default function CreateUser() {
 
     const fetchRoles = async () => {
         try {
-            const { data } = await getRoles();
+            const { data } =
+                await getRoles();
 
-            console.log("Roles:", data.data);
-
-            setRoles(data.data);
+            setRoles(
+                (data.data || []).filter(
+                    (role) =>
+                        role.name !==
+                        "Owner"
+                )
+            );
         } catch (error) {
             console.log(error);
-            toast.error("Failed to load roles");
+
+            toast.error(
+                "Failed to load roles"
+            );
         }
     };
 
@@ -137,10 +145,13 @@ export default function CreateUser() {
                         </option>
 
                         {roles.map((role) => (
-    <option key={role._id} value={role._id}>
-        {role.name}
-    </option>
-))}
+                            <option
+                                key={role._id}
+                                value={role._id}
+                            >
+                                {role.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
 

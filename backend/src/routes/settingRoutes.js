@@ -13,6 +13,9 @@ const permission =
 const PERMISSIONS =
     require("../constants/permissions");
 
+const tenantUpload =
+    require("../middleware/tenantUpload");
+
 const {
     getSettings,
     updateSettings,
@@ -35,6 +38,29 @@ router.put(
         "settings",
         PERMISSIONS.UPDATE
     ),
+    tenantUpload.fields([
+        {
+            name: "companyLogo",
+            maxCount: 1,
+        },
+        {
+            name: "favicon",
+            maxCount: 1,
+        },
+        {
+            name: "gstCertificate",
+            maxCount: 1,
+        },
+        {
+            name: "panCard",
+            maxCount: 1,
+        },
+        {
+            name:
+                "incorporationCertificate",
+            maxCount: 1,
+        },
+    ]),
     updateSettings
 );
 

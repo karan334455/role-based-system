@@ -24,6 +24,7 @@ import Profile from "../modules/profile/page/profile";
 import ActivityLogs from "../modules/Activity/pages/ActivityLogs";
 import MyActivity from "../modules/User/pages/MyActivity";
 import Settings from "../modules/Settings/pages/Settings";
+import CompanyProfile from "../modules/Settings/pages/CompanyProfile";
 
 export const router = createBrowserRouter([
     // ── Public / Auth routes ──────────────────────────────────────────────────
@@ -155,6 +156,14 @@ export const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute resource="settings" action="view">
                         <Settings />
+                    </ProtectedRoute>
+                ),
+            },
+            {
+                path: "company-profile",
+                element: (
+                    <ProtectedRoute resource="settings" action="view">
+                        <CompanyProfile />
                     </ProtectedRoute>
                 ),
             },

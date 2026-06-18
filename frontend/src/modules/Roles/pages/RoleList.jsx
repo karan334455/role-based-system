@@ -165,8 +165,8 @@ export default function RoleList() {
                     )}
             </div>
 
-            <div className="bg-white rounded-xl shadow">
-                <table className="w-full">
+            <div className="bg-white rounded-xl shadow overflow-x-auto">
+                <table className="w-full min-w-[500px]">
                     <thead>
                         <tr>
                             <th className="p-4 text-left">

@@ -184,6 +184,24 @@ exports.register = async (req, res) => {
         const tenant = await Tenant.create({
             companyName,
             slug,
+
+            branding: {
+                companyLogo: "",
+                favicon: "",
+            },
+
+            documents: {
+                gstCertificate: "",
+                panCard: "",
+                incorporationCertificate: "",
+            },
+
+            settings: {
+                timezone:
+                    "Asia/Kolkata",
+                emailNotifications:
+                    true,
+            },
         });
 
         const [ownerRole] = await Role.insertMany([
@@ -524,24 +542,149 @@ exports.login = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(
-            req.user._id,
-            {
-                name: req.body.name,
-            },
-            {
-                new: true,
-            }
-        ).populate("roleId");
+        const updateData = {
+            name: req.body.name,
+        };
+
+
+        const normalizePath = (
+            file
+        ) => {
+            return `/${file.path.replace(
+                /\\/g,
+                "/"
+            )}`;
+        };
+
+        if (req.file) {
+            updateData.profileImage =
+                normalizePath(
+                    req.file
+                );
+        }
+
+        const user =
+            await User.findByIdAndUpdate(
+                req.user._id,
+                updateData,
+                {
+                    new: true,
+                    runValidators: true,
+                }
+            )
+                .populate(
+                    "tenantId"
+                )
+                .populate(
+                    "roleId"
+                )
+                .select(
+                    "-password -otp -otpExpiresAt"
+                );
 
         res.json({
             success: true,
             data: user,
+            message:
+                "Profile updated successfully",
         });
     } catch (error) {
+        console.log(
+            error
+        );
+
         res.status(500).json({
             success: false,
-            message: error.message,
+            message:
+                error.message,
+        });
+    }
+
+
+};
+
+exports.updateDocuments = async (
+    req,
+    res
+) => {
+    try {
+        const user =
+            await User.findById(
+                req.user._id
+            );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message:
+                    "User not found",
+            });
+        }
+
+        if (!user.documents) {
+            user.documents = {};
+        }
+
+        const normalizePath = (
+            file
+        ) => {
+            return `/${file.path.replace(
+                /\\/g,
+                "/"
+            )}`;
+        };
+
+        if (
+            req.files?.resume?.[0]
+        ) {
+            user.documents.resume =
+                normalizePath(
+                    req.files.resume[0]
+                );
+        }
+
+        if (
+            req.files?.aadhaar?.[0]
+        ) {
+            user.documents.aadhaar =
+                normalizePath(
+                    req.files.aadhaar[0]
+                );
+        }
+
+        if (
+            req.files?.panCard?.[0]
+        ) {
+            user.documents.panCard =
+                normalizePath(
+                    req.files.panCard[0]
+                );
+        }
+
+        if (
+            req.files?.signature?.[0]
+        ) {
+            user.signature =
+                normalizePath(
+                    req.files.signature[0]
+                );
+        }
+
+        await user.save();
+
+        res.json({
+            success: true,
+            message:
+                "Documents updated successfully",
+            data: user,
+        });
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message:
+                error.message,
         });
     }
 };

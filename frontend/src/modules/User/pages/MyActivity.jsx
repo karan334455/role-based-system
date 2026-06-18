@@ -43,7 +43,7 @@ export default function MyActivity() {
                 </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow overflow-hidden">
+            <div className="bg-white rounded-xl shadow overflow-x-auto">
                 {loading ? (
                     <div className="p-8 text-center">
                         Loading...
@@ -54,7 +54,7 @@ export default function MyActivity() {
                         No activity found
                     </div>
                 ) : (
-                    <table className="w-full">
+                    <table className="w-full min-w-[600px]">
                         <thead>
                             <tr className="border-b bg-slate-50">
                                 <th className="p-4 text-left">

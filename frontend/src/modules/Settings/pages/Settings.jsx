@@ -2,17 +2,37 @@ import { useEffect, useState } from "react";
 import api from "@/app/axios";
 import toast from "react-hot-toast";
 
+const IMAGE_BASE_URL =
+    "http://localhost:6001";
+
 export default function Settings() {
+    const [loading, setLoading] =
+        useState(false);
+
     const [settings, setSettings] =
         useState({
             companyName: "",
             companyEmail: "",
-            timezone: "Asia/Kolkata",
+            companyPhone: "",
+            website: "",
+            address: "",
+            gstNumber: "",
+            timezone:
+                "Asia/Kolkata",
             plan: "",
-        });
 
-    const [loading, setLoading] =
-        useState(false);
+            companyLogo: null,
+            favicon: null,
+
+            gstCertificate: null,
+            panCard: null,
+            incorporationCertificate:
+                null,
+
+            companyLogoPreview:
+                "",
+            faviconPreview: "",
+        });
 
     useEffect(() => {
         fetchSettings();
@@ -29,27 +49,76 @@ export default function Settings() {
                 if (
                     data.success
                 ) {
-                    setSettings({
-                        companyName:
-                            data.data
-                                ?.companyName ||
-                            "",
+                    setSettings(
+                        (
+                            prev
+                        ) => ({
+                            ...prev,
 
-                        companyEmail:
-                            data.data
-                                ?.companyEmail ||
-                            "",
+                            companyName:
+                                data
+                                    .data
+                                    ?.companyName ||
+                                "",
 
-                        timezone:
-                            data.data
-                                ?.timezone ||
-                            "Asia/Kolkata",
+                            companyEmail:
+                                data
+                                    .data
+                                    ?.companyEmail ||
+                                "",
 
-                        plan:
-                            data.data
-                                ?.plan ||
-                            "Free",
-                    });
+                            companyPhone:
+                                data
+                                    .data
+                                    ?.companyPhone ||
+                                "",
+
+                            website:
+                                data
+                                    .data
+                                    ?.website ||
+                                "",
+
+                            address:
+                                data
+                                    .data
+                                    ?.address ||
+                                "",
+
+                            gstNumber:
+                                data
+                                    .data
+                                    ?.gstNumber ||
+                                "",
+
+                            timezone:
+                                data
+                                    .data
+                                    ?.settings
+                                    ?.timezone ||
+                                "Asia/Kolkata",
+
+                            plan:
+                                data
+                                    .data
+                                    ?.plan ||
+                                "free",
+
+                            companyLogoPreview:
+                                data
+                                    .data
+                                    ?.branding
+                                    ?.companyLogo ||
+                                "",
+
+                            faviconPreview:
+                                data
+                                    .data
+                                    ?.branding
+                                    ?.favicon ||
+                                "",
+                        })
+                    );
                 }
             } catch (
             error
@@ -79,23 +148,106 @@ export default function Settings() {
                     true
                 );
 
+                const formData =
+                    new FormData();
+
+                formData.append(
+                    "companyName",
+                    settings.companyName
+                );
+
+                formData.append(
+                    "companyEmail",
+                    settings.companyEmail
+                );
+
+                formData.append(
+                    "companyPhone",
+                    settings.companyPhone
+                );
+
+                formData.append(
+                    "website",
+                    settings.website
+                );
+
+                formData.append(
+                    "address",
+                    settings.address
+                );
+
+                formData.append(
+                    "gstNumber",
+                    settings.gstNumber
+                );
+
+                formData.append(
+                    "timezone",
+                    settings.timezone
+                );
+
+                if (
+                    settings.companyLogo
+                ) {
+                    formData.append(
+                        "companyLogo",
+                        settings.companyLogo
+                    );
+                }
+
+                if (
+                    settings.favicon
+                ) {
+                    formData.append(
+                        "favicon",
+                        settings.favicon
+                    );
+                }
+
+                if (
+                    settings.gstCertificate
+                ) {
+                    formData.append(
+                        "gstCertificate",
+                        settings.gstCertificate
+                    );
+                }
+
+                if (
+                    settings.panCard
+                ) {
+                    formData.append(
+                        "panCard",
+                        settings.panCard
+                    );
+                }
+
+                if (
+                    settings.incorporationCertificate
+                ) {
+                    formData.append(
+                        "incorporationCertificate",
+                        settings.incorporationCertificate
+                    );
+                }
+
                 await api.put(
                     "/settings",
+                    formData,
                     {
-                        companyName:
-                            settings.companyName,
-
-                        companyEmail:
-                            settings.companyEmail,
-
-                        timezone:
-                            settings.timezone,
+                        headers:
+                        {
+                            "Content-Type":
+                                "multipart/form-data",
+                        },
                     }
                 );
 
                 toast.success(
                     "Settings updated successfully"
                 );
+
+                fetchSettings();
             } catch (
             error
             ) {
@@ -114,7 +266,7 @@ export default function Settings() {
         };
 
     return (
-        <div className="max-w-3xl">
+        <div className="max-w-5xl">
             <h1 className="text-3xl font-bold mb-6">
                 Settings
             </h1>
@@ -123,18 +275,113 @@ export default function Settings() {
                 onSubmit={
                     handleSubmit
                 }
-                className="bg-white rounded-xl shadow p-6 space-y-5"
+                className="bg-white rounded-xl shadow p-6 space-y-6"
             >
+                <div className="grid md:grid-cols-2 gap-5">
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            Company
+                            Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="companyName"
+                            value={
+                                settings.companyName
+                            }
+                            onChange={
+                                handleChange
+                            }
+                            className="w-full border rounded-lg p-3"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            Company
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            name="companyEmail"
+                            value={
+                                settings.companyEmail
+                            }
+                            onChange={
+                                handleChange
+                            }
+                            className="w-full border rounded-lg p-3"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            Company
+                            Phone
+                        </label>
+
+                        <input
+                            type="text"
+                            name="companyPhone"
+                            value={
+                                settings.companyPhone
+                            }
+                            onChange={
+                                handleChange
+                            }
+                            className="w-full border rounded-lg p-3"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            Website
+                        </label>
+
+                        <input
+                            type="text"
+                            name="website"
+                            value={
+                                settings.website
+                            }
+                            onChange={
+                                handleChange
+                            }
+                            className="w-full border rounded-lg p-3"
+                        />
+                    </div>
+                </div>
+
                 <div>
                     <label className="block mb-2 font-medium">
-                        Company Name
+                        Address
+                    </label>
+
+                    <textarea
+                        rows="3"
+                        name="address"
+                        value={
+                            settings.address
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        className="w-full border rounded-lg p-3"
+                    />
+                </div>
+
+                <div>
+                    <label className="block mb-2 font-medium">
+                        GST Number
                     </label>
 
                     <input
                         type="text"
-                        name="companyName"
+                        name="gstNumber"
                         value={
-                            settings.companyName
+                            settings.gstNumber
                         }
                         onChange={
                             handleChange
@@ -143,55 +390,141 @@ export default function Settings() {
                     />
                 </div>
 
-                <div>
-                    <label className="block mb-2 font-medium">
-                        Company Email
-                    </label>
+                <div className="grid md:grid-cols-2 gap-5">
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            Company Logo
+                        </label>
 
-                    <input
-                        type="email"
-                        name="companyEmail"
-                        value={
-                            settings.companyEmail
-                        }
-                        onChange={
-                            handleChange
-                        }
-                        className="w-full border rounded-lg p-3"
-                    />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(
+                                e
+                            ) =>
+                                setSettings(
+                                    (
+                                        prev
+                                    ) => ({
+                                        ...prev,
+                                        companyLogo:
+                                            e
+                                                .target
+                                                .files[0],
+                                    })
+                                )
+                            }
+                            className="w-full border rounded-lg p-3"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            Favicon
+                        </label>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(
+                                e
+                            ) =>
+                                setSettings(
+                                    (
+                                        prev
+                                    ) => ({
+                                        ...prev,
+                                        favicon:
+                                            e
+                                                .target
+                                                .files[0],
+                                    })
+                                )
+                            }
+                            className="w-full border rounded-lg p-3"
+                        />
+                    </div>
                 </div>
 
-                <div>
-                    <label className="block mb-2 font-medium">
-                        Timezone
-                    </label>
+                <div className="grid md:grid-cols-3 gap-5">
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            GST Certificate
+                        </label>
 
-                    <select
-                        name="timezone"
-                        value={
-                            settings.timezone
-                        }
-                        onChange={
-                            handleChange
-                        }
-                        className="w-full border rounded-lg p-3"
-                    >
-                        <option value="Asia/Kolkata">
-                            Asia/Kolkata
-                        </option>
+                        <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={(
+                                e
+                            ) =>
+                                setSettings(
+                                    (
+                                        prev
+                                    ) => ({
+                                        ...prev,
+                                        gstCertificate:
+                                            e
+                                                .target
+                                                .files[0],
+                                    })
+                                )
+                            }
+                        />
+                    </div>
 
-                        <option value="UTC">
-                            UTC
-                        </option>
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            PAN Card
+                        </label>
 
-                        <option value="America/New_York">
-                            America/New_York
-                        </option>
+                        <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={(
+                                e
+                            ) =>
+                                setSettings(
+                                    (
+                                        prev
+                                    ) => ({
+                                        ...prev,
+                                        panCard:
+                                            e
+                                                .target
+                                                .files[0],
+                                    })
+                                )
+                            }
+                        />
+                    </div>
 
-                        <option value="Europe/London">
-                            Europe/London
-                        </option>
-                    </select>
+                    <div>
+                        <label className="block mb-2 font-medium">
+                            Incorporation
+                            Certificate
+                        </label>
+
+                        <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={(
+                                e
+                            ) =>
+                                setSettings(
+                                    (
+                                        prev
+                                    ) => ({
+                                        ...prev,
+                                        incorporationCertificate:
+                                            e
+                                                .target
+                                                .files[0],
+                                    })
+                                )
+                            }
+                        />
+                    </div>
                 </div>
 
                 <div>
@@ -222,4 +555,6 @@ export default function Settings() {
             </form>
         </div>
     );
+
+
 }

@@ -8,6 +8,9 @@ import {
 } from "../../services/userService";
 import toast from "react-hot-toast";
 import PERMISSIONS from "@/constants/permissions";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function UserList() {
     const navigate = useNavigate();
@@ -116,9 +119,110 @@ export default function UserList() {
                     u.status === filter
             );
 
+    const downloadCSV = () => {
+        const rows = filteredUsers.map(
+            (user) => ({
+                Name: user.name,
+                Email: user.email,
+                Role: user.roleId?.name || "User",
+                Status: user.status,
+            })
+        );
+
+        const headers = [
+            "Name",
+            "Email",
+            "Role",
+            "Status",
+        ];
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map((row) =>
+                [
+                    `"${row.Name}"`,
+                    `"${row.Email}"`,
+                    `"${row.Role}"`,
+                    `"${row.Status}"`,
+                ].join(",")
+            ),
+        ].join("\n");
+
+        const blob = new Blob(
+            [csvContent],
+            {
+                type: "text/csv;charset=utf-8;",
+            }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `users-${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const downloadExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(
+            filteredUsers.map(
+                (user) => ({
+                    Name: user.name,
+                    Email: user.email,
+                    Role: user.roleId?.name || "User",
+                    Status: user.status,
+                })
+            )
+        );
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            "Users"
+        );
+
+        XLSX.writeFile(
+            workbook,
+            "users.xlsx"
+        );
+    };
+
+    const downloadPDF = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text("Users Report", 14, 20);
+
+        autoTable(doc, {
+            startY: 30,
+            head: [
+                [
+                    "Name",
+                    "Email",
+                    "Role",
+                    "Status",
+                ],
+            ],
+            body: filteredUsers.map(
+                (user) => [
+                    user.name,
+                    user.email,
+                    user.roleId?.name || "User",
+                    user.status,
+                ]
+            ),
+        });
+
+        doc.save("users.pdf");
+    };
+
+    const printReport = () => {
+        window.print();
+    };
+
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
                 <div>
                     <h1 className="text-3xl font-bold">
                         Users
@@ -129,26 +233,52 @@ export default function UserList() {
                     </p>
                 </div>
 
-                {canCreateUsers && (
+                <div className="flex flex-wrap items-center gap-2">
                     <button
-                        onClick={() =>
-                            navigate(
-                                "/users/create"
-                            )
-                        }
-                        className="bg-slate-900 text-white px-4 py-2 rounded-lg"
+                        onClick={downloadCSV}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
                     >
-                        Add User
+                        CSV
                     </button>
-                )}
+                    <button
+                        onClick={downloadExcel}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
+                    >
+                        Excel
+                    </button>
+                    <button
+                        onClick={downloadPDF}
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
+                    >
+                        PDF
+                    </button>
+                    <button
+                        onClick={printReport}
+                        className="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-lg text-sm font-medium cursor-pointer"
+                    >
+                        Print
+                    </button>
+                    {canCreateUsers && (
+                        <button
+                            onClick={() =>
+                                navigate(
+                                    "/users/create"
+                                )
+                            }
+                            className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium w-full sm:w-auto text-center cursor-pointer"
+                        >
+                            Add User
+                        </button>
+                    )}
+                </div>
             </div>
 
-            <div className="flex gap-3 mb-5">
+            <div className="flex flex-wrap gap-2 mb-5">
                 <button
                     onClick={() =>
                         setFilter("all")
                     }
-                    className={`px-4 py-2 rounded-lg ${filter === "all"
+                    className={`px-4 py-2 rounded-lg text-sm ${filter === "all"
                         ? "bg-slate-900 text-white"
                         : "bg-white border"
                         }`}
@@ -162,7 +292,7 @@ export default function UserList() {
                             "active"
                         )
                     }
-                    className={`px-4 py-2 rounded-lg ${filter === "active"
+                    className={`px-4 py-2 rounded-lg text-sm ${filter === "active"
                         ? "bg-green-600 text-white"
                         : "bg-white border"
                         }`}
@@ -176,7 +306,7 @@ export default function UserList() {
                             "pending"
                         )
                     }
-                    className={`px-4 py-2 rounded-lg ${filter === "pending"
+                    className={`px-4 py-2 rounded-lg text-sm ${filter === "pending"
                         ? "bg-yellow-500 text-white"
                         : "bg-white border"
                         }`}
@@ -185,8 +315,9 @@ export default function UserList() {
                 </button>
             </div>
 
-            <div className="bg-white rounded-xl shadow overflow-hidden">
-                <table className="w-full">
+            <div className="bg-white rounded-xl shadow overflow-x-auto">
+
+                <table className="w-full min-w-[800px]">
                     <thead>
                         <tr className="border-b bg-slate-50">
                             <th className="p-4 text-left">

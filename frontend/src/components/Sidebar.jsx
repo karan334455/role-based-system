@@ -2,15 +2,22 @@ import { Link, useLocation } from "react-router-dom";
 import PERMISSIONS from "@/constants/permissions";
 import hasPermission from "@/utils/hasPermission";
 
-export default function Sidebar() {
-    const location = useLocation();
+export default function Sidebar({
+    isOpen,
+    onClose,
+}) {
+    const location =
+        useLocation();
 
     const user = JSON.parse(
-        localStorage.getItem("user") || "null"
+        localStorage.getItem(
+            "user"
+        ) || "null"
     );
 
     const p =
-        user?.roleId?.permissions || {};
+        user?.roleId
+            ?.permissions || {};
 
     const canDashboard =
         hasPermission(
@@ -44,9 +51,18 @@ export default function Sidebar() {
 
     const canActivityLogs =
         hasPermission(
-            p.activityLogs || 0,
+            p.activityLogs ||
+            0,
             PERMISSIONS.VIEW
         );
+
+    const isOwner =
+        user?.roleId?.name ===
+        "Owner";
+
+    const isAdminRole =
+        user?.roleId
+            ?.isAdmin === true;
 
     const isAdmin =
         canUsers ||
@@ -93,62 +109,151 @@ export default function Sidebar() {
         {
             name: "My Activity",
             path: "/my-activity",
-            show: !isAdmin,
+            show:
+                !isAdmin,
         },
 
         {
             name: "Profile",
             path: "/profile",
-            show: canProfile,
+            show:
+                canProfile,
+        },
+
+        {
+            name: "Company Profile",
+            path: "/company-profile",
+            show:
+                (isOwner ||
+                    isAdminRole) &&
+                canSettings,
         },
 
         {
             name: "Settings",
             path: "/settings",
-            show: canSettings,
+            show:
+                (isOwner ||
+                    isAdminRole) &&
+                canSettings,
         },
     ];
 
     return (
-        <aside className="w-64 bg-slate-900 text-white min-h-screen flex flex-col">
-            <div className="h-16 flex items-center px-6 border-b border-slate-800">
-                <h1 className="text-2xl font-bold">
-                    TeamFlow
-                </h1>
-            </div>
-
-            <nav className="p-4 space-y-1 flex-1">
-                {menus
-                    .filter(
-                        (menu) => menu.show
-                    )
-                    .map((menu) => (
-                        <Link
-                            key={menu.path}
-                            to={menu.path}
-                            className={`flex items-center px-4 py-3 rounded-lg text-sm transition-colors ${location.pathname ===
-                                    menu.path
-                                    ? "bg-slate-700 text-white font-semibold"
-                                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                                }`}
-                        >
-                            {menu.name}
-                        </Link>
-                    ))}
-            </nav>
-
-            {user && (
-                <div className="p-4 border-t border-slate-800">
-                    <p className="text-xs text-slate-400 truncate">
-                        {user.name}
-                    </p>
-
-                    <p className="text-xs text-slate-500 truncate">
-                        {user.roleId?.name ||
-                            "User"}
-                    </p>
-                </div>
+        <>
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
+                    onClick={
+                        onClose
+                    }
+                />
             )}
-        </aside>
+
+            <aside
+                className={`fixed inset-y-0 left-0 w-64 bg-slate-900 text-white z-50 flex flex-col transition-transform duration-300 md:static md:translate-x-0 ${isOpen
+                        ? "translate-x-0"
+                        : "-translate-x-full"
+                    }`}
+            >
+                <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800">
+                    <h1 className="text-2xl font-bold">
+                        TeamFlow
+                    </h1>
+
+                    <button
+                        onClick={
+                            onClose
+                        }
+                        className="md:hidden text-slate-400 hover:text-white p-2 rounded-lg cursor-pointer"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <nav className="p-4 space-y-1 flex-1">
+                    {menus
+                        .filter(
+                            (
+                                menu
+                            ) =>
+                                menu.show
+                        )
+                        .map(
+                            (
+                                menu
+                            ) => (
+                                <Link
+                                    key={
+                                        menu.path
+                                    }
+                                    to={
+                                        menu.path
+                                    }
+                                    onClick={
+                                        onClose
+                                    }
+                                    className={`flex items-center px-4 py-3 rounded-lg text-sm transition-colors ${location.pathname ===
+                                            menu.path
+                                            ? "bg-slate-700 text-white font-semibold"
+                                            : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                                        }`}
+                                >
+                                    {
+                                        menu.name
+                                    }
+                                </Link>
+                            )
+                        )}
+                </nav>
+
+                {user && (
+                    <div className="p-4 border-t border-slate-800 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-slate-700 overflow-hidden flex items-center justify-center flex-shrink-0 border border-slate-800">
+                            {user.profileImage ? (
+                                <img
+                                    src={encodeURI(
+                                        user.profileImage.startsWith(
+                                            "http"
+                                        )
+                                            ? user.profileImage
+                                            : `http://localhost:6001${user.profileImage}`
+                                    )}
+                                    alt="User Avatar"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <span className="text-sm font-bold text-slate-300">
+                                    {user.name
+                                        ? user.name
+                                            .charAt(
+                                                0
+                                            )
+                                            .toUpperCase()
+                                        : "U"}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-slate-200 truncate">
+                                {
+                                    user.name
+                                }
+                            </p>
+
+                            <p className="text-xs text-slate-500 truncate">
+                                {user
+                                    .roleId
+                                    ?.name ||
+                                    "User"}
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </aside>
+        </>
     );
+
+
 }

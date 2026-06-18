@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getDashboardStats } from "@/modules/services/dashboardService";
 
 // ── Dynamic helpers ───────────────────────────────────────────────────────────
@@ -307,7 +308,134 @@ export default function Dashboard() {
                     ))
                 }
             </div>
+            <div className="bg-white rounded-xl border p-6 mb-6">
+                <h2 className="text-lg font-semibold mb-4">
+                    Company Information
+                </h2>
 
+                <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <p className="text-sm text-gray-500">
+                            Company
+                        </p>
+
+                        <p className="font-semibold">
+                            {dashboard?.companyName || "-"}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="text-sm text-gray-500">
+                            Plan
+                        </p>
+
+                        <p className="font-semibold capitalize">
+                            {dashboard?.plan || "-"}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="text-sm text-gray-500">
+                            Status
+                        </p>
+
+                        <p className="font-semibold">
+                            {dashboard?.isActive
+                                ? "Active"
+                                : "Inactive"}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                        "repeat(auto-fit,minmax(300px,1fr))",
+                    gap: "1rem",
+                    marginBottom: "2rem",
+                }}
+            >
+
+
+                <div
+                    style={{
+                        background: "#fff",
+                        borderRadius: 14,
+                        padding: "1.5rem",
+                        border:
+                            "1px solid #e5e7eb",
+                        boxShadow:
+                            "0 1px 4px rgba(0,0,0,0.05)",
+                    }}
+                >
+                    <h2
+                        style={{
+                            fontSize: 18,
+                            fontWeight: 700,
+                            marginBottom: 16,
+                        }}
+                    >
+                        ⚡ Quick Actions
+                    </h2>
+
+                    <div
+                        style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 10,
+                        }}
+                    >
+                        <Link
+                            to="/users/create"
+                            style={{
+                                padding:
+                                    "10px 14px",
+                                background:
+                                    "#111827",
+                                color: "#fff",
+                                borderRadius: 8,
+                                textDecoration:
+                                    "none",
+                            }}
+                        >
+                            Add User
+                        </Link>
+
+                        <Link
+                            to="/roles/create"
+                            style={{
+                                padding:
+                                    "10px 14px",
+                                background:
+                                    "#4f46e5",
+                                color: "#fff",
+                                borderRadius: 8,
+                                textDecoration:
+                                    "none",
+                            }}
+                        >
+                            Create Role
+                        </Link>
+
+                        <Link
+                            to="/settings"
+                            style={{
+                                padding:
+                                    "10px 14px",
+                                background:
+                                    "#16a34a",
+                                color: "#fff",
+                                borderRadius: 8,
+                                textDecoration:
+                                    "none",
+                            }}
+                        >
+                            Settings
+                        </Link>
+                    </div>
+                </div>
+            </div>
             {/* Activity feed — fully dynamic */}
             <div style={{
                 background: "#fff",

@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { getActivities } from "../../../services/activityService";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function ActivityLogs() {
     const [activities, setActivities] =
@@ -83,7 +86,128 @@ export default function ActivityLogs() {
             startIndex +
             itemsPerPage
         );
+    const downloadCSV = () => {
+        const rows = filteredActivities.map(
+            (activity) => ({
+                Action: activity.action,
+                Description:
+                    activity.description,
+                Date: new Date(
+                    activity.createdAt
+                ).toLocaleString(),
+            })
+        );
 
+        const headers = [
+            "Action",
+            "Description",
+            "Date",
+        ];
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map((row) =>
+                [
+                    `"${row.Action}"`,
+                    `"${row.Description}"`,
+                    `"${row.Date}"`,
+                ].join(",")
+            ),
+        ].join("\n");
+
+        const blob = new Blob(
+            [csvContent],
+            {
+                type: "text/csv;charset=utf-8;",
+            }
+        );
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const link =
+            document.createElement("a");
+
+        link.href = url;
+
+        link.download = `activity-logs-${new Date()
+            .toISOString()
+            .split("T")[0]}.csv`;
+
+        link.click();
+
+        URL.revokeObjectURL(url);
+    };
+    const downloadExcel = () => {
+        const worksheet =
+            XLSX.utils.json_to_sheet(
+                filteredActivities.map(
+                    (a) => ({
+                        Action: a.action,
+                        Description:
+                            a.description,
+                        Date: new Date(
+                            a.createdAt
+                        ).toLocaleString(),
+                    })
+                )
+            );
+
+        const workbook =
+            XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            "Activity Logs"
+        );
+
+        XLSX.writeFile(
+            workbook,
+            "activity-logs.xlsx"
+        );
+    };
+
+    const downloadPDF = () => {
+        const doc =
+            new jsPDF();
+
+        doc.setFontSize(18);
+
+        doc.text(
+            "Activity Logs Report",
+            14,
+            20
+        );
+
+        autoTable(doc, {
+            startY: 30,
+            head: [
+                [
+                    "Action",
+                    "Description",
+                    "Date",
+                ],
+            ],
+            body:
+                filteredActivities.map(
+                    (a) => [
+                        a.action,
+                        a.description,
+                        new Date(
+                            a.createdAt
+                        ).toLocaleString(),
+                    ]
+                ),
+        });
+
+        doc.save(
+            "activity-logs.pdf"
+        );
+    };
+    const printReport = () => {
+        window.print();
+    };
     return (
         <div>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -97,13 +221,43 @@ export default function ActivityLogs() {
                     </p>
                 </div>
 
-                <div className="text-sm text-gray-500">
-                    Total Records:{" "}
-                    <span className="font-semibold">
-                        {
-                            filteredActivities.length
-                        }
-                    </span>
+                <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={downloadCSV}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg"
+                        >
+                            CSV
+                        </button>
+
+                        <button
+                            onClick={downloadExcel}
+                            className="bg-emerald-600 text-white px-4 py-2 rounded-lg"
+                        >
+                            Excel
+                        </button>
+
+                        <button
+                            onClick={downloadPDF}
+                            className="bg-red-600 text-white px-4 py-2 rounded-lg"
+                        >
+                            PDF
+                        </button>
+
+                        <button
+                            onClick={printReport}
+                            className="bg-slate-700 text-white px-4 py-2 rounded-lg"
+                        >
+                            Print
+                        </button>
+                    </div>
+
+                    {/* <button
+                        onClick={downloadCSV}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm"
+                    >
+                        Download CSV
+                    </button> */}
                 </div>
             </div>
 
@@ -144,8 +298,8 @@ export default function ActivityLogs() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow overflow-hidden">
-                <table className="w-full">
+            <div className="bg-white rounded-xl shadow overflow-x-auto">
+                <table className="w-full min-w-[600px]">
                     <thead>
                         <tr className="border-b bg-slate-50">
                             <th className="p-4 text-left">
